@@ -37,7 +37,7 @@
 - Caching
 	- NSUserDefaults are used to store an NSMutableDictionary.
 	- Dictionary Ojects: Paths to images stored in a temporary folder on the disk. 
-	- Dictionary Keys: Imag download URLs.
+	- Dictionary Keys: Download URLs for images.
 	- Cache is emptied if there are too many entires.
 		- This condition is defined by the *AsynchronousFreeloaderCacheSize* macro in **AsynchronousFreeloader.h**
 		- The default value is **200**.
