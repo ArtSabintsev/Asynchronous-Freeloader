@@ -222,13 +222,6 @@
     
     dispatch_async(dispatch_get_main_queue(), ^{
         
-        // Remove UIActivityIndicatorView
-        for ( UIActivityIndicatorView *view in [imageView subviews] ) {
-            
-            [view stopAnimating];
-            [view removeFromSuperview];
-        }
-        
         // Update imageView on Main Thread
         imageView.contentMode = UIViewContentModeScaleAspectFill;
         imageView.clipsToBounds = YES;
