@@ -12,7 +12,7 @@
 - Temporary Disk Caching
 - Support for placeholder/loading UIView object
 - Multithreaded Image Downloading
-- Automated Garbage Collections- - 
+- Automated Garbage Collections 
 
 ### Instructions:
 
