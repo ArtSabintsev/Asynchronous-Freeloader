@@ -19,10 +19,15 @@
 + (NSMutableDictionary*)createReferenceToCache;                             // Create local instance of NSMutableDictionary
 
 + (BOOL)doesImageWithName:(NSString*)name                                   // Check if image exists in cache and on device (determines if HTTP request needs to be performed)
-                   exist:(NSMutableDictionary*)cache;                                          
+                   existInCache:(NSMutableDictionary*)cache;                                          
 
 + (void)saveImageWithName:(NSString*)name                                   // Save data from asynchronous response to tmp directory on device
                  fromData:(NSData*)data;                    
+
++ (void)resaveImageWithName:(NSString*)name                                 // Change position of image in cache to preserve newness 
+                    inCache:(NSMutableDictionary*)cache;                         
+
++ (void)performGarbageCollection;                                           // Clear cache if number of entries exceeds amount defined by 'AsynchronousFreeloaderCache'
 
 + (void)successfulResponseForImageView:(UIImageView*)imageView              // Asynchronous request succeeded
                               withData:(NSData *)data
@@ -47,12 +52,12 @@
         NSMutableDictionary *cache = [AsynchronousFreeloader createReferenceToCache];
         
         // Check if image exists in cache and on disk
-        BOOL imageExists = [AsynchronousFreeloader doesImageWithName:link exist:cache];
+        BOOL imageExists = [AsynchronousFreeloader doesImageWithName:link existInCache:cache];
         
         if ( imageExists ) {    
             
             // Load image from disk
-            imageView.image = [UIImage imageWithContentsOfFile:[cache objectForKey:link]];
+            imageView.image = [UIImage imageWithContentsOfFile:[[cache objectForKey:AsynchronousFreeloaderCachePaths] valueForKey:link]];
             
             // Remove placeholder
             [self removePlaceholderView:placeholderView fromImageView:imageView];
@@ -89,14 +94,55 @@
     
 }
 
++ (void)removeImageFromCache:(NSString *)link
+{
+
+   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+       NSMutableDictionary *cache = [AsynchronousFreeloader createReferenceToCache];
+       
+       // Save path to pathsDictionary of cache
+       NSMutableDictionary *pathsDictionary = [NSMutableDictionary dictionaryWithDictionary:[cache objectForKey:link]];
+       [pathsDictionary removeObjectForKey:link];
+       
+       // Save name to namesArray of cache (used to retain position)
+       NSMutableArray *namesArray = [NSMutableArray arrayWithArray:[cache objectForKey:link]];
+       [namesArray removeObject:link];
+       
+       // Save pathsDictionary and namesArray to cache
+       [cache setObject:pathsDictionary forKey:AsynchronousFreeloaderCachePaths];
+       [cache setObject:namesArray forKey:AsynchronousFreeloaderCacheNames];
+   
+       // Save cache to NSUserDefaults
+       [[NSUserDefaults standardUserDefaults] setObject:cache forKey:AsynchronousFreeloaderCache];
+       [[NSUserDefaults standardUserDefaults] synchronize];
+       
+   });
+
+}
+
++ (void)removeAllImages
+{
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+        NSMutableDictionary *cache = [AsynchronousFreeloader createReferenceToCache];
+        
+        // Save cache to NSUserDefaults
+        [cache removeAllObjects];
+        [[NSUserDefaults standardUserDefaults] setObject:cache forKey:AsynchronousFreeloaderCache];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+
+    });
+    
+}
+
 #pragma mark - Private Methods
 + (void)presentPlaceholderView:(UIView *)placeholderView inImageView:(UIImageView *)imageView
 {
     dispatch_async(dispatch_get_main_queue(), ^{
    
         if ( nil == placeholderView ) {     // Add UIActivityIndicatorView placeholder
-            
-
                 
                 UIActivityIndicatorView *activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
                 [activityIndicator setFrame:imageView.frame]; 
@@ -136,10 +182,11 @@
     });
 
 }
-                   
+
 + (NSMutableDictionary*)createReferenceToCache
 {
     
+    // Create Cache
     NSMutableDictionary *cache = [NSMutableDictionary dictionary];
     
     if ( [[NSUserDefaults standardUserDefaults] objectForKey:AsynchronousFreeloaderCache] ) {
@@ -147,43 +194,48 @@
         // Add stored cache from NSUserDefaults
         [cache setDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:AsynchronousFreeloaderCache]];
         
-        // Empty cache if there are too many entries
-        if  ( AsynchronousFreeloaderCacheSize >= [cache count] ) {
-            
-            [cache removeAllObjects];
-            [[NSUserDefaults standardUserDefaults] setObject:cache forKey:AsynchronousFreeloaderCache];
-            [[NSUserDefaults standardUserDefaults] synchronize];
-         
-        }
-         
+    } else {
         
+        [cache setObject:[NSMutableDictionary dictionary] forKey:AsynchronousFreeloaderCachePaths];
+        [cache setObject:[NSMutableArray array] forKey:AsynchronousFreeloaderCacheNames];
+        [[NSUserDefaults standardUserDefaults] setObject:cache forKey:AsynchronousFreeloaderCache];
+        [[NSUserDefaults standardUserDefaults] synchronize];
     }
     
     return cache;
 }
 
-+ (BOOL)doesImageWithName:(NSString *)name exist:(NSMutableDictionary *)cache
++ (BOOL)doesImageWithName:(NSString *)name existInCache:(NSMutableDictionary *)cache
 {
     
-    BOOL imageExists;
+    BOOL imageExists = NO;
+    NSMutableArray *namesArray = [NSMutableArray arrayWithArray:[cache objectForKey:AsynchronousFreeloaderCacheNames]];
+    NSMutableDictionary *pathsDictionary = [NSMutableDictionary dictionaryWithDictionary:[cache objectForKey:AsynchronousFreeloaderCachePaths]];
+  
+    NSString *imagePath = [pathsDictionary valueForKey:name];
     
+
     // Check if image reference exists in cache
-    BOOL cacheReferenceExists = ( [cache objectForKey:name] ) ? YES : NO;
+    BOOL cacheReferenceExists = ( [namesArray containsObject:name] ) ? YES : NO;
     
     // Check if image exists at referenced path
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    BOOL pathReferenceExists = [fileManager fileExistsAtPath:[cache objectForKey:name]];
+    BOOL pathReferenceExists = [fileManager fileExistsAtPath:imagePath];
     
     if ( cacheReferenceExists && pathReferenceExists ) {            // If image exists in cache and on device
         
+        // Change position of image in cache and update NSUserDefaults
+        [AsynchronousFreeloader resaveImageWithName:name inCache:cache];
+        
         imageExists = YES;
+        
     
     } else if ( cacheReferenceExists && !pathReferenceExists ) {    // If image exists in cache, but doesn't exist on device
         
-        // Remove image-reference from cache and update NSUserDefaults
-        [cache removeObjectForKey:name];
-        [[NSUserDefaults standardUserDefaults] setObject:cache forKey:AsynchronousFreeloaderCache];
-        [[NSUserDefaults standardUserDefaults] synchronize];
+        // Remove reference to image from cache and update NSUserDefaults
+        [AsynchronousFreeloader removeImageFromCache:name];
+        
+        imageExists = NO;
         
     } else {                                                        // If image doesn't exists in cache, nor on the device
         
@@ -206,8 +258,17 @@
     NSString *path = [NSString stringWithFormat:@"%@%@", NSTemporaryDirectory(), filename];
     [data writeToFile:path atomically:YES];
     
-    // Save path to cache
-    [cache setObject:path forKey:name];
+    // Save path to pathsDictionary of cache
+    NSMutableDictionary *pathsDictionary = [NSMutableDictionary dictionaryWithDictionary:[cache objectForKey:AsynchronousFreeloaderCachePaths]];
+    [pathsDictionary setObject:path forKey:name];
+    
+    // Save name to namesArray of cache (used to retain position)
+    NSMutableArray *namesArray = [NSMutableArray arrayWithArray:[cache objectForKey:AsynchronousFreeloaderCacheNames]];
+    [namesArray addObject:name];
+
+    // Save pathsDictionary and namesArray to cache
+    [cache setObject:pathsDictionary forKey:AsynchronousFreeloaderCachePaths];
+    [cache setObject:namesArray forKey:AsynchronousFreeloaderCacheNames];
     
     // Save cache to NSUserDefaults
     [[NSUserDefaults standardUserDefaults] setObject:cache forKey:AsynchronousFreeloaderCache];
@@ -215,7 +276,60 @@
     
 }
 
-+ (void)successfulResponseForImageView:(UIImageView *)imageView withData:(NSData *)data fromLink:(NSString *)link
++ (void)resaveImageWithName:(NSString *)name inCache:(NSMutableDictionary *)cache
+{
+    // Create reference to  namesArray and change location of image
+    NSMutableArray *namesArray = [NSMutableArray arrayWithArray:[cache objectForKey:AsynchronousFreeloaderCacheNames]];
+
+    [namesArray removeObject:name];
+    [namesArray addObject:name];
+    
+    // Save namesArray in cache
+    [cache setObject:namesArray forKey:AsynchronousFreeloaderCacheNames];
+    
+    // Save cache to NSUserDefaults
+    [[NSUserDefaults standardUserDefaults] setObject:cache forKey:AsynchronousFreeloaderCache];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
++ (void)performGarbageCollection
+{
+    
+    NSMutableDictionary *cache = [AsynchronousFreeloader createReferenceToCache];
+    
+    // Reference pathsDictionary and namesArray
+    NSMutableDictionary *pathsDictionary = [NSMutableDictionary dictionaryWithDictionary:[cache objectForKey:AsynchronousFreeloaderCachePaths]];
+    NSMutableArray *namesArray = [NSMutableArray arrayWithArray:[cache objectForKey:AsynchronousFreeloaderCacheNames]];
+    
+    // Empty cache if there are too many entries
+    if  ( [namesArray count] >= AsynchronousFreeloaderCacheSize ) {
+        
+        NSUInteger limitExcessionAmount = (NSUInteger)fabs([namesArray count] - AsynchronousFreeloaderCacheSize);
+        
+        while (limitExcessionAmount > 0) {
+            
+            [pathsDictionary removeObjectForKey:[namesArray objectAtIndex:0]];
+            [namesArray removeObjectAtIndex:0];
+            
+            limitExcessionAmount--;
+            
+        }
+
+    }
+    
+    // Save pathsDictionary and namesArray to cache
+    [cache setObject:pathsDictionary forKey:AsynchronousFreeloaderCachePaths];
+    [cache setObject:namesArray forKey:AsynchronousFreeloaderCacheNames];
+    
+    // Save cache to NSUserDefaults
+    [[NSUserDefaults standardUserDefaults] setObject:cache forKey:AsynchronousFreeloaderCache];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    
+}
+
++ (void)successfulResponseForImageView:(UIImageView *)imageView 
+                              withData:(NSData *)data 
+                              fromLink:(NSString *)link
 {
     
     [AsynchronousFreeloader saveImageWithName:link fromData:data];
@@ -228,6 +342,8 @@
         imageView.image = [UIImage imageWithData:data];
     
     });
+    
+    [AsynchronousFreeloader performGarbageCollection];
     
 }
 

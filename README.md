@@ -12,41 +12,37 @@
 - Temporary Disk Caching
 - Support for placeholder/loading UIView object
 - Multithreaded Image Downloading
+- Automated Garbage Collections- - 
 
-### Installation Instructions:
+### Instructions:
 
+#### Files
 - Copy the 'Asynchronous Freeloader' folder into your Xcode project. The following files will be added:
 	1. AsynchronousFreeloader.h
 	1. AsynchronousFreeloader.m
-	
-- Follow the instructions below:
 
-<pre>
- - Add #import "AsynchronousFreeloader.h" to your class(es).
- 
- 	- Use the following line of code to download your image:
- 
- 	[AsynchronusFreeloader loadImageFromLink:(NSString *)link 
- 								forImageView:(UIImageView *)imageView
- 						 withPlaceholderView:(UIView *)placeholderView];
- 
-	- The third parameter, 'placeholderView' is optional. 
-	- A large white UIActivityIndicatorView will be used if you pass 'nil' to placeholderView.
-</pre>
+#### Incorporating AsynchronousFreeloader to Existing Project
+- Import **AsynchronousFreeloader.h** to your classes.
+- Inspect **AsynchronousFreeloader.h** for heavily commented public methods.
 
-- Caching
-	- NSUserDefaults are used to store an NSMutableDictionary.
-	- Dictionary Ojects: Paths to images stored in a temporary folder on the disk. 
-	- Dictionary Keys: Download URLs for images.
-	- Cache is emptied if there are too many entires.
-		- This condition is defined by the *AsynchronousFreeloaderCacheSize* macro in **AsynchronousFreeloader.h**
-		- The default value is **200**.
-	
+####  Caching
+- NSUserDefaults are used to store an NSMutableDictionary.
+- The NSMutableDictionary contains two objects:
+	1. *pathsDictionary:* NSMutableDictionary of paths to images stored in a temporary folder on the disk. 
+	1. *namesArray:* NSMutableArray of URLS to images, which are used as keys throughout the class. 
+- Cache is emptied if number of entries exceeds a user-defined limit
+	- This condition is defined by the *AsynchronousFreeloaderCacheSize* macro in **AsynchronousFreeloader.h**.
+	- The default value is **100**.
 - Failed Response
-	- There's a method named **failedResponseForImageView:** that is empty by default.
-	- Place your error handling code in there.
+	- Place your error handling code in **failedResponseForImageView:** 
+	- The method is empty by default.
 
-##  Release Notes (v1.0.0):
+###  Release Notes (v1.1.0):
+- Added automated garbage collection for cache
+- Added ability for custom garbage collection on cache
+
+###  Previous Release Notes 
+#### v1.0.0:
 - Initial Release
 
 ### Recognition:
