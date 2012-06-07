@@ -145,7 +145,8 @@
         if ( nil == placeholderView ) {     // Add UIActivityIndicatorView placeholder
                 
                 UIActivityIndicatorView *activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
-                [activityIndicator setFrame:imageView.frame]; 
+                [activityIndicator setFrame:imageView.frame];
+                [activityIndicator setCenter:CGPointMake(imageView.frame.size.width/2.0f, imageView.frame.size.height/2.0f)];
                 [imageView addSubview:activityIndicator]; 
                 [activityIndicator startAnimating];
                 
