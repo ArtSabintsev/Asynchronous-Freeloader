@@ -58,6 +58,8 @@
             
             // Load image from disk
             imageView.image = [UIImage imageWithContentsOfFile:[[cache objectForKey:AsynchronousFreeloaderCachePaths] valueForKey:link]];
+            imageView.contentMode = UIViewContentModeScaleAspectFill;
+            imageView.clipsToBounds = YES;
             
             // Remove placeholder
             [self removePlaceholderView:placeholderView fromImageView:imageView];

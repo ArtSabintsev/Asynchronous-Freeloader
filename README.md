@@ -9,7 +9,7 @@
 - iOS 5+ Compatible
 - ARC Compliant
 - Image Scaling
-- Temporary Disk Caching
+- Disk Caching
 - Support for placeholder/loading UIView object
 - Multithreaded Image Downloading
 - Automated Garbage Collections 
@@ -37,11 +37,13 @@
 	- Place your error handling code in **failedResponseForImageView:** 
 	- The method is empty by default.
 
-###  Release Notes (v1.1.0):
-- Added automated garbage collection for cache
-- Added ability for custom garbage collection on cache
+###  Release Notes (v1.1.1):
+- Images now redrawn correctly if they're loaded from the cache
 
-###  Previous Release Notes 
+###  Previous Release Notes
+#### v1.1.0
+- Added automated garbage collection for cache
+
 #### v1.0.0:
 - Initial Release
 
