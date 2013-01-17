@@ -25,7 +25,24 @@
 - Import **AsynchronousFreeloader.h** to your classes.
 - Inspect **AsynchronousFreeloader.h** for heavily commented public methods.
 
-####  Caching
+#### Fetch Images
+<pre>
+
++ (void)loadImageFromLink:(NSString *)link 
+             forImageView:(UIImageView *)imageView 
+      withPlaceholderView:(UIView*)placeholderView
+           andContentMode:(UIViewContentMode)contentMode;
+
+</pre>
+The parameters:
+
+- **link**: An NSString of the image's URL
+- **imageView**: The imageView in which to load the fetched image
+- **placeholderView**: The imageView to display while fetching your image (if nil, a large, white UIActivityIndicatorView is used)
+- **contentMode**: Allows you to set the scale/fill of the downloaded image (**added in v1.2.0**)
+
+
+#### Caching
 - NSUserDefaults are used to store an NSMutableDictionary.
 - The NSMutableDictionary contains two objects:
 	1. *pathsDictionary:* NSMutableDictionary of paths to images stored in a temporary folder on the disk. 
@@ -37,10 +54,13 @@
 	- Place your error handling code in **failedResponseForImageView:** 
 	- The method is empty by default.
 
-###  Release Notes (v1.1.1):
-- Images now redrawn correctly if they're loaded from the cache
+###  Release Notes (v1.2.0):
+-  Added support for user-preferred UIViewContentMode in image fetching method.
 
 ###  Previous Release Notes
+#### v1.1.1
+- Images now redrawn correctly if they're loaded from the cache
+
 #### v1.1.0
 - Added automated garbage collection for cache
 

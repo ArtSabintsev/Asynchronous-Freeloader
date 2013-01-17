@@ -31,7 +31,8 @@
 
 + (void)successfulResponseForImageView:(UIImageView*)imageView              // Asynchronous request succeeded
                               withData:(NSData *)data
-                              fromLink:(NSString*)link;
+                              fromLink:(NSString*)link
+                        andContentMode:(UIViewContentMode)contentMode;
 
 + (void)failedResponseForImageView:(UIImageView*)imageView;                 // Asynchronous request failed
 
@@ -40,7 +41,10 @@
 @implementation AsynchronousFreeloader
 
 #pragma mark - Public Methods
-+ (void)loadImageFromLink:(NSString *)link forImageView:(UIImageView *)imageView withPlaceholderView:(UIView *)placeholderView
++ (void)loadImageFromLink:(NSString *)link
+             forImageView:(UIImageView *)imageView
+      withPlaceholderView:(UIView *)placeholderView
+           andContentMode:(UIViewContentMode)contentMode
 {
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -57,10 +61,12 @@
         if ( imageExists ) {    
             
             // Load image from disk
-            imageView.image = [UIImage imageWithContentsOfFile:[[cache objectForKey:AsynchronousFreeloaderCachePaths] valueForKey:link]];
-            imageView.contentMode = UIViewContentModeScaleAspectFill;
-            imageView.clipsToBounds = YES;
-            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                imageView.contentMode = contentMode;
+                imageView.clipsToBounds = YES;
+                imageView.image = [UIImage imageWithContentsOfFile:[[cache objectForKey:AsynchronousFreeloaderCachePaths] valueForKey:link]];
+            });
+                           
             // Remove placeholder
             [self removePlaceholderView:placeholderView fromImageView:imageView];
 
@@ -76,7 +82,7 @@
                 
                 if ([data length] > 0 && error == nil) {    // Successful asynchronous response
                     
-                    [AsynchronousFreeloader successfulResponseForImageView:imageView withData:data fromLink:link];
+                    [AsynchronousFreeloader successfulResponseForImageView:imageView withData:data fromLink:link andContentMode:contentMode];
                     
                 } else {                                    // Failed asynchronous response
                     
@@ -222,7 +228,7 @@
     BOOL cacheReferenceExists = ( [namesArray containsObject:name] ) ? YES : NO;
     
     // Check if image exists at referenced path
-    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSFileManager *fileManager = [[NSFileManager alloc] init];
     BOOL pathReferenceExists = [fileManager fileExistsAtPath:imagePath];
     
     if ( cacheReferenceExists && pathReferenceExists ) {            // If image exists in cache and on device
@@ -333,6 +339,7 @@
 + (void)successfulResponseForImageView:(UIImageView *)imageView 
                               withData:(NSData *)data 
                               fromLink:(NSString *)link
+                        andContentMode:(UIViewContentMode)contentMode
 {
     
     [AsynchronousFreeloader saveImageWithName:link fromData:data];
@@ -340,7 +347,7 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         
         // Update imageView on Main Thread
-        imageView.contentMode = UIViewContentModeScaleAspectFill;
+        imageView.contentMode = contentMode;
         imageView.clipsToBounds = YES;
         imageView.image = [UIImage imageWithData:data];
     
