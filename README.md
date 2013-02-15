@@ -36,10 +36,10 @@
 </pre>
 The parameters:
 
-- **link**: An NSString of the image's URL
-- **imageView**: The imageView in which to load the fetched image
-- **placeholderView**: The imageView to display while fetching your image (if nil, a large, white UIActivityIndicatorView is used)
-- **contentMode**: Allows you to set the scale/fill of the downloaded image (**added in v1.2.0**)
+- ```link```: An NSString of the image's URL
+- ```imageView```: The imageView in which to load the fetched image
+- ```placeholderView```: The imageView to display while fetching your image (if nil, a large, white UIActivityIndicatorView is used)
+- ```contentMode```: Allows you to set the scale/fill of the downloaded image (**added in v1.2.0**)
 
 
 #### Caching
@@ -57,19 +57,15 @@ The parameters:
 ###  Release Notes (v1.2.0):
 -  Added support for user-preferred UIViewContentMode in image fetching method.
 
-###  Previous Release Notes
-#### v1.1.1
-- Images now redrawn correctly if they're loaded from the cache
-
-#### v1.1.0
-- Added automated garbage collection for cache
-
-#### v1.0.0:
-- Initial Release
-
 ### Recognition:
-- Created for [Shelby.tv](http://www.shelby.tv) at Cyberdyne Systems NYC
+Created by [Arthur Ariel Sabintsev](http://www.sabintsev.com)  
 
-Best,
+### License
+The MIT License (MIT)
+Copyright (c) 2012 Arthur Ariel Sabintsev
 
-[Arthur Ariel Sabintsev](http://www.sabintsev.com)  
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
