@@ -49,9 +49,6 @@
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
-        // Present placeholderView
-        [self presentPlaceholderView:placeholderView inImageView:imageView];
-        
         // Reference Cache (e.g., NSMutableDictionary)
         NSMutableDictionary *cache = [AsynchronousFreeloader createReferenceToCache];
         
@@ -67,11 +64,11 @@
                 imageView.image = [UIImage imageWithContentsOfFile:[[cache objectForKey:AsynchronousFreeloaderCachePaths] valueForKey:link]];
             });
                            
-            // Remove placeholder
-            [self removePlaceholderView:placeholderView fromImageView:imageView];
-
             
         } else {                
+            
+            // Present placeholderView
+            [self presentPlaceholderView:placeholderView inImageView:imageView];
             
             // Load image from web via asychronous request
             NSURL *url = [NSURL URLWithString:link];
