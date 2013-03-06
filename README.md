@@ -30,7 +30,7 @@
 
 + (void)loadImageFromLink:(NSString *)link 
              forImageView:(UIImageView *)imageView 
-      withPlaceholderView:(UIView*)placeholderView
+      	  withPlaceholder:(UIImage *)placeholder
            andContentMode:(UIViewContentMode)contentMode;
 
 </pre>
@@ -38,7 +38,7 @@ The parameters:
 
 - ```link```: An NSString of the image's URL
 - ```imageView```: The imageView in which to load the fetched image
-- ```placeholderView```: The imageView to display while fetching your image (if nil, a large, white UIActivityIndicatorView is used)
+- ```placeholder```: The image to display while fetching the image. A white UIActivityIndicatorView will be displayed on top of the image while loading. (if nil, only a large, white UIActivityIndicatorView is used)
 - ```contentMode```: Allows you to set the scale/fill of the downloaded image (**added in v1.2.0**)
 
 
