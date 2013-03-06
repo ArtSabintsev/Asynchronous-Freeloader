@@ -38,7 +38,7 @@ The parameters:
 
 - ```link```: An NSString of the image's URL
 - ```imageView```: The imageView in which to load the fetched image
-- ```placeholder```: The image to display while fetching the image. A white UIActivityIndicatorView will be displayed on top of the image while loading. (if nil, only a large, white UIActivityIndicatorView is used)
+- ```placeholder```: The image to display while fetching the image. If ```nil```, a large, white UIActivityIndicatorView will be displayed on top of the image while loading.
 - ```contentMode```: Allows you to set the scale/fill of the downloaded image (**added in v1.2.0**)
 
 
@@ -49,13 +49,16 @@ The parameters:
 	1. *namesArray:* NSMutableArray of URLS to images, which are used as keys throughout the class. 
 - Cache is emptied if number of entries exceeds a user-defined limit
 	- This condition is defined by the *AsynchronousFreeloaderCacheSize* macro in **AsynchronousFreeloader.h**.
-	- The default value is **100**.
+	- The default value is **1000**.
 - Failed Response
 	- Place your error handling code in **failedResponseForImageView:** 
 	- The method is empty by default.
 
-###  Release Notes (v1.2.0):
--  Added support for user-preferred UIViewContentMode in image fetching method.
+###  Release Notes (v1.2.1):
+-  Removed placeholderView (UIImageView) in favor of placeholder (UIImage).
+
+### Contributions:
+- [Keren Pinkas](http://www.githin.com/kepsolution) (v1.2.1)
 
 ### Recognition:
 Created by [Arthur Ariel Sabintsev](http://www.sabintsev.com)  
