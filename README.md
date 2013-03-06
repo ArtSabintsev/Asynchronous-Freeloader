@@ -58,7 +58,7 @@ The parameters:
 -  Removed placeholderView (UIImageView) in favor of placeholder (UIImage).
 
 ### Contributions:
-- [Keren Pinkas](http://www.githin.com/kepsolution) (v1.2.1)
+- [Keren Pinkas](http://www.github.com/kepsolution) (v1.2.1)
 
 ### Recognition:
 Created by [Arthur Ariel Sabintsev](http://www.sabintsev.com)  
