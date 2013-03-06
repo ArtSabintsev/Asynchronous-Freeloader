@@ -10,11 +10,10 @@
 
 @interface AsynchronousFreeloader ()
 
-+ (void)presentPlaceholderView:(UIView*)placeholderView                     // Present placeholderView while data is loaded from disk/web
-                   inImageView:(UIImageView*)imageView;
++ (void)presentPlaceholder:(UIImage *)placeholder                           // Present placeholder while data is loaded from disk/web
+               inImageView:(UIImageView*)imageView;
 
-+ (void)removePlaceholderView:(UIView*)placeholderView                      // Remove placeholderView after data is loaded from disk/web
-                fromImageView:(UIImageView*)imageView;
++ (void)removeActivityIndicator:(UIImageView*)imageView;                    // Remove Activity Indicator
 
 + (NSMutableDictionary*)createReferenceToCache;                             // Create local instance of NSMutableDictionary
 
@@ -43,14 +42,11 @@
 #pragma mark - Public Methods
 + (void)loadImageFromLink:(NSString *)link
              forImageView:(UIImageView *)imageView
-      withPlaceholderView:(UIView *)placeholderView
+          withPlaceholder:(UIImage *)placeholder
            andContentMode:(UIViewContentMode)contentMode
 {
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        
-        // Present placeholderView
-        [self presentPlaceholderView:placeholderView inImageView:imageView];
         
         // Reference Cache (e.g., NSMutableDictionary)
         NSMutableDictionary *cache = [AsynchronousFreeloader createReferenceToCache];
@@ -67,11 +63,11 @@
                 imageView.image = [UIImage imageWithContentsOfFile:[[cache objectForKey:AsynchronousFreeloaderCachePaths] valueForKey:link]];
             });
                            
-            // Remove placeholder
-            [self removePlaceholderView:placeholderView fromImageView:imageView];
-
             
         } else {                
+            
+            // Present placeholderView
+            [self presentPlaceholder:placeholder inImageView:imageView];
             
             // Load image from web via asychronous request
             NSURL *url = [NSURL URLWithString:link];
@@ -90,9 +86,8 @@
                     
                 }
                 
-                // Remove placeholder
-                [self removePlaceholderView:placeholderView fromImageView:imageView];
-                
+                // Remove activity indicator after success or failure. 
+                [self removeActivityIndicator:imageView];
             }];
             
         }
@@ -146,50 +141,32 @@
 }
 
 #pragma mark - Private Methods
-+ (void)presentPlaceholderView:(UIView *)placeholderView inImageView:(UIImageView *)imageView
++ (void)presentPlaceholder:(UIImage *)placeholder inImageView:(UIImageView *)imageView
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-   
-        if ( nil == placeholderView ) {     // Add UIActivityIndicatorView placeholder
-                
-                UIActivityIndicatorView *activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
-                [activityIndicator setFrame:imageView.frame];
-                [activityIndicator setCenter:CGPointMake(imageView.frame.size.width/2.0f, imageView.frame.size.height/2.0f)];
-                [imageView addSubview:activityIndicator]; 
-                [activityIndicator startAnimating];
-                
-            
-        } else {                            // Add user-defined placeholder
-            
-            [imageView addSubview:placeholderView];
-            
-        }
+        UIActivityIndicatorView *activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+        [activityIndicator setFrame:imageView.frame];
+        [activityIndicator setCenter:CGPointMake(imageView.frame.size.width/2.0f, imageView.frame.size.height/2.0f)];
+        [imageView addSubview:activityIndicator];
+        [activityIndicator startAnimating];
         
+        if (placeholder) {                           // Add user-defined placeholder
+            [imageView setImage:placeholder];
+        }
     });
     
 }
 
-+ (void)removePlaceholderView:(UIView *)placeholderView fromImageView:(UIImageView *)imageView
+
++ (void)removeActivityIndicator:(UIImageView *)imageView
 {
     
     dispatch_async(dispatch_get_main_queue(), ^{
-            
-        if ( nil == placeholderView ) {     // Remove UIActivityIndicatorView placeholder
-            
-            for ( UIActivityIndicatorView *view in [imageView subviews] ) {
-                
-                [view stopAnimating];
-                [view removeFromSuperview];
-            }
-            
-        } else {                            // Remove user-defined placeholder 
-            
-            [placeholderView removeFromSuperview];
-            
+        for (UIActivityIndicatorView *view in [imageView subviews]) {
+            [view stopAnimating];
+            [view removeFromSuperview];
         }
-    
     });
-
 }
 
 + (NSMutableDictionary*)createReferenceToCache
