@@ -38,8 +38,8 @@ The parameters:
 
 - ```link```: An NSString of the image's URL
 - ```imageView```: The imageView in which to load the fetched image
-- ```placeholder```: The image to display while fetching the image. If ```nil```, a large, white UIActivityIndicatorView will be displayed on top of the image while loading.
-- ```contentMode```: Allows you to set the scale/fill of the downloaded image (**added in v1.2.0**)
+- ```placeholder```: The image to display while fetching the image. A large, white UIActivityIndicatorView will be displayed on top of the image while it's loading. This even works when you pass ```nil``` to this parameter.
+- ```contentMode```: Allows you to set the scale/fill of the downloaded image
 
 
 #### Caching
