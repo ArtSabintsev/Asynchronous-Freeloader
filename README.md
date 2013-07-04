@@ -2,6 +2,9 @@
 
 ## Multithreaded Asynchronous Image Downloader
 
+### NOTE
+I am no longer supporting this app as the disk-caching was added in iOS 5. Somehow it slipped under my radar. More information over [Peter Steinberger's Blog](http://petersteinberger.com/blog/2012/nsurlcache-uses-a-disk-cache-as-of-ios5/).
+
 ### About
 **Asynchronous Freeloader** is an asynchronous image downloader that utilizes Grand Central Dispatch and disk caching.
 
